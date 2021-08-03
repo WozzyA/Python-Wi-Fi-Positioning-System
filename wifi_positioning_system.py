@@ -13,10 +13,11 @@ Python Wi-Fi Positioning System - Wi-Fi geolocation script using the Google Maps
 """
 
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from commands import getoutput, getstatusoutput
-import simplejson
+from subprocess import getoutput, getstatusoutput
+import json
 import textwrap
-import urllib2
+import urllib
+import urllib.request as ureq
 import grp
 import sys
 import os
@@ -58,9 +59,9 @@ def get_scriptpath():
 
 def prettify_json(json_data):
     if args.json_prettify:
-        return '\n'.join([l.rstrip() for l in simplejson.dumps(json_data, sort_keys=True, indent=4*' ').splitlines()])
+        return '\n'.join([l.rstrip() for l in json.dumps(json_data, sort_keys=True, indent=4*' ').splitlines()])
     else:
-        return simplejson.dumps(json_data)
+        return json.dumps(json_data)
 
 
 def create_overview(api_result, map_type, filename='Wifi_geolocation.html', filepath=get_scriptpath()):
@@ -161,7 +162,7 @@ def create_overview(api_result, map_type, filename='Wifi_geolocation.html', file
         overview.write(html)
 
     if args.verbose:
-        print filepath + filename
+        print(filepath, filename, sep="")
 
     # Keep the owners
     scriptpath = get_scriptpath()
@@ -182,11 +183,11 @@ def get_signal_strengths(wifi_scan_method):
         iw_scan_status, iw_scan_result = getstatusoutput(iw_command)
 
         if iw_scan_status != 0:
-            print "[!] Unable to scan for Wi-Fi networks !"
-            print "Used command: '%s'" % iw_command
-            print "Result:\n" + '\n'.join(iw_scan_result.split('\n')[:10])
+            print("[!] Unable to scan for Wi-Fi networks !")
+            print("Used command: '%s'" % iw_command)
+            print("Result:\n",'\n'.join(iw_scan_result.split('\n')[:10]))
             if len(iw_scan_result.split('\n')) > 10:
-				print "[...]"
+                print("[...]")
             exit(1)
         else:
             parsing_result = re.compile("BSS ([\w\d\:]+).*\n.*\n.*\n.*\n.*\n\tsignal: ([-\d]+)", re.MULTILINE).findall(iw_scan_result)
@@ -200,11 +201,11 @@ def get_signal_strengths(wifi_scan_method):
         airport_scan_status, airport_scan_xml = getstatusoutput(airport_xml_cmd)
 
         if airport_scan_status != 0:
-            print "[!] Unable to scan for Wi-Fi networks !"
-            print "Used command: '%s'" % airport_xml_cmd
-            print "Result:\n" + '\n'.join(airport_scan_xml.split('\n')[:10])
+            print("[!] Unable to scan for Wi-Fi networks !")
+            print("Used command: '%s'" % airport_xml_cmd)
+            print("Result:\n" + '\n'.join(airport_scan_xml.split('\n')[:10]))
             if len(airport_scan_xml.split('\n')) > 10:
-				print "[...]"
+                print("[...]")
             exit(1)
         else:
             root = ET.fromstring(airport_scan_xml)
@@ -218,11 +219,11 @@ def get_signal_strengths(wifi_scan_method):
         ifconfig_scan_status, ifconfig_scan_result = getstatusoutput(ifconfig_cmd)
 
         if ifconfig_scan_status != 0:
-            print "[!] Unable to scan for Wi-Fi networks !"
-            print "Used command: '%s'" % ifconfig_cmd
-            print "Result:\n" + '\n'.join(ifconfig_scan_result.split('\n')[:10])
+            print("[!] Unable to scan for Wi-Fi networks !")
+            print("Used command: '%s'" % ifconfig_cmd)
+            print("Result:\n" + '\n'.join(ifconfig_scan_result.split('\n')[:10]))
             if len(ifconfig_scan_result.split('\n')) > 10:
-				print "[...]"
+                print("[...]")
             exit(1)
         else:
             parsing_result = re.compile("nwid\s+[\w-]+\s+chan\s+\d+\s+bssid\s+([\w\d\:]+)\s+([-\d]+)dBm", re.MULTILINE).findall(ifconfig_scan_result)
@@ -271,7 +272,7 @@ def check_prerequisites():
                     if su_gui_cmd:
                         perm_cmd = su_gui_cmd
                     else:
-                        print "Error: this script need to be run as root !"
+                        print("Error: this script need to be run as root !")
                         exit(1)
             #else:
                 #print "[+] Current user is '%s'" % os.environ.get('USER')
@@ -281,7 +282,7 @@ def check_prerequisites():
                 # Restart as root
                 #print "[+] This script need to be run as root, current user is '%s'" % os.environ.get('USER')
                 if args.verbose:
-                    print "[+] Using '" + perm_cmd.split()[0] + "' for asking permissions"
+                    print("[+] Using '" + perm_cmd.split()[0] + "' for asking permissions")
                 if perm_cmd is 'sudo --preserve-env':
                     #print perm_cmd.split()[0], perm_cmd.split() + [
                     #          ' '.join(['./' + sys.argv[0].lstrip('./')])
@@ -299,13 +300,13 @@ def check_prerequisites():
 
             which_iw_status, which_iw_result = getstatusoutput('which iw')
             if which_iw_status != 0:
-                print "Missing dependency: 'iw' is needed\n" + \
-                      "    iw - tool for configuring Linux wireless devices"
+                print("Missing dependency: 'iw' is needed\n" + \
+                      "    iw - tool for configuring Linux wireless devices")
                 if 'ubuntu' in getoutput('uname -a').lower():
-                    print "    > sudo apt-get install iw"
+                    print("    > sudo apt-get install iw")
                 # TODO for other distro, see with /etc/*release files ?
                 elif 'gentoo' in getoutput('cat /etc/*release').lower():
-                    print "    > su -c 'emerge -av net-wireless/iw'"
+                    print("    > su -c 'emerge -av net-wireless/iw'")
                 exit(1)
             else:
                 wifi_scan_method = 'iw'
@@ -314,8 +315,8 @@ def check_prerequisites():
         elif sys.platform == 'darwin':
             aiport_path = '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport'
             if not os.path.exists(aiport_path):
-                print "Missing dependency:\n" + \
-                      "    airport - tool for configuring Apple wireless devices from Terminal.app"
+                print("Missing dependency:\n" + \
+                      "    airport - tool for configuring Apple wireless devices from Terminal.app")
                 exit(1)
             else:
                 wifi_scan_method = 'airport'
@@ -346,7 +347,7 @@ def check_prerequisites():
                     perm_cmd = 'su -c'
                 else:
                     # TODO "If no one is in the "wheel" group, it is ignored [...]" ?
-                    print "Error: this script need to be run as root !"
+                    print("Error: this script need to be run as root !")
                     exit(1)
 
             wifi_scan_method = 'ifconfig'
@@ -355,10 +356,10 @@ def check_prerequisites():
         # All other systems - or exception for non-supported system
         # Like 'win32'...
         # TODO is 'cygwin' could be found on Mac OS X operation systems ?
-        print "Error: unsupported operating system..." + \
+        print("Error: unsupported operating system..." + \
               "\nMicrosoft Windows operating systems are not currently supported, missing Wi-Fi cli tool / library." + \
               "\nIf you use a Mac OS X operating system, the detected plateform could have been 'cygwin'," + \
-              "\nplease let us know so we can publish a correction with your help !"
+              "\nplease let us know so we can publish a correction with your help !")
         exit(1)
 
     return wifi_scan_method
@@ -462,7 +463,7 @@ if __name__ == "__main__":
         # TODO parameter for displaying messages or not
         # --verbose command line argument see get_arguments()
         if args.verbose:
-            print "[+] Scanning nearby Wi-Fi networks (demo)"
+            print("[+] Scanning nearby Wi-Fi networks (demo)")
 
         # Demo - West Norwood (London)
         wifi_data = [
@@ -478,12 +479,12 @@ if __name__ == "__main__":
         wifi_scan_method = check_prerequisites()
 
         if args.verbose:
-            print "[+] Scanning nearby Wi-Fi networks..."
+            print ("[+] Scanning nearby Wi-Fi networks...")
         wifi_data = get_signal_strengths(wifi_scan_method)
         # TODO check if the amount of detected Wi-Fi access points is good enough to call the API
-        
+
     if args.verbose:
-        print "[+] Generating the HTML request"
+        print ("[+] Generating the HTML request")
     location_request = {
         'considerIp': False,
         'wifiAccessPoints':[
@@ -494,37 +495,42 @@ if __name__ == "__main__":
     }
 
     if args.verbose:
-        print prettify_json(location_request)
+        print (prettify_json(location_request))
 
     # Check for missing API_KEY
     if args.api_key:
         API_KEY = args.api_key
     if not API_KEY or API_KEY is 'YOUR_KEY':
-        print "Error: a Google Maps Geolocation API key is required, get it yours here:\n" + \
-              "https://developers.google.com/maps/documentation/geolocation/intro"
+        print ("Error: a Google Maps Geolocation API key is required, get it yours here:\n" + \
+              "https://developers.google.com/maps/documentation/geolocation/intro")
         exit(1)
     else:
-        json_data = simplejson.JSONEncoder().encode(location_request)
-        http_request = urllib2.Request('https://www.googleapis.com/geolocation/v1/geolocate?key=' + API_KEY)
-        http_request.add_header('Content-Type', 'application/json')
+        dataa = json.dumps(location_request).encode()
+
+        http_request = ureq.Request('https://www.googleapis.com/geolocation/v1/geolocate?key=' + API_KEY)
 
         if args.verbose:
-            print "[+] Sending the request to Google"
+            print ("[+] Sending the request to Google")
         # TODO internet connection error handling ?
-        api_result = simplejson.loads(urllib2.urlopen(http_request, json_data).read())
+
+        try:
+            api_result = json.loads(ureq.urlopen(http_request, dataa).read())
+        except ureq.HTTPError as e:
+            error_message = e.read()
+            api_result = json.loads(error_message)
 
         if args.verbose:
-            print "[+] Result"
+            print ("[+] Result")
 
         # Print JSON results
-        print prettify_json(api_result)
+        print (prettify_json(api_result))
 
         if args.verbose:
-            print "[+] Google Maps link"
-            print 'https://www.google.com/maps?q=%f,%f' % (api_result['location']['lat'], api_result['location']['lng'])
+            print ("[+] Google Maps link")
+            print ('https://www.google.com/maps?q=%f,%f' % (api_result['location']['lat'], api_result['location']['lng']))
 
         # --with-overview argument set to False by default via get_arguments()
-        if args.with_overview: 
+        if args.with_overview:
             if args.verbose:
-                print "[+] Accuracy overview"
+                print ("[+] Accuracy overview")
             create_overview(api_result, args.map_type)
