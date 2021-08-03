@@ -7,6 +7,7 @@
 Python Wi-Fi Positioning System
 ===============================
 
+Script updated to Python3.
 This script use the Google Geolocation API.  
 It was tested on GNU/Linux (require `iw`), OpenBSD (use `ifconfig`) and Mac OS X (require `airport`).  
 Special thanks go to contributors!
