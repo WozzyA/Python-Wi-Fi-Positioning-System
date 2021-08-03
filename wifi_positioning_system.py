@@ -16,8 +16,7 @@ from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from subprocess import getoutput, getstatusoutput
 import json
 import textwrap
-import urllib
-import urllib.request as ureq
+import requests
 import grp
 import sys
 import os
@@ -486,8 +485,8 @@ if __name__ == "__main__":
     if args.verbose:
         print ("[+] Generating the HTML request")
     location_request = {
-        'considerIp': False,
-        'wifiAccessPoints':[
+        "considerIp": False,
+        "wifiAccessPoints":[
             {
                 "macAddress": mac,
                 "signalStrength": signal
@@ -505,19 +504,13 @@ if __name__ == "__main__":
               "https://developers.google.com/maps/documentation/geolocation/intro")
         exit(1)
     else:
-        dataa = json.dumps(location_request).encode()
-
-        http_request = ureq.Request('https://www.googleapis.com/geolocation/v1/geolocate?key=' + API_KEY)
+        url = 'https://www.googleapis.com/geolocation/v1/geolocate?key=' + API_KEY
 
         if args.verbose:
             print ("[+] Sending the request to Google")
         # TODO internet connection error handling ?
 
-        try:
-            api_result = json.loads(ureq.urlopen(http_request, dataa).read())
-        except ureq.HTTPError as e:
-            error_message = e.read()
-            api_result = json.loads(error_message)
+        api_result = requests.post(url, json=location_request).json()
 
         if args.verbose:
             print ("[+] Result")
