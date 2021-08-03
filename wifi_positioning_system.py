@@ -508,8 +508,8 @@ if __name__ == "__main__":
 
         if args.verbose:
             print ("[+] Sending the request to Google")
-        # TODO internet connection error handling ?
 
+        # TODO internet connection error handling ?
         api_result = requests.post(url, json=location_request).json()
 
         if args.verbose:
