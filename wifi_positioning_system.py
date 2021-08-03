@@ -158,7 +158,7 @@ def create_overview(api_result, map_type, filename='Wifi_geolocation.html', file
     </html>"""
 
     # TODO parameters for output file path / name modification
-    with open(filepath+filename, 'wb') as overview:
+    with open(filepath+filename, 'w') as overview:
         overview.write(html)
 
     if args.verbose:
