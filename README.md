@@ -8,14 +8,14 @@ Python Wi-Fi Positioning System
 ===============================
 
 #### *Script updated to Python3!*  
-This script use the Google Geolocation API.  
+This script uses the Google Geolocation API.  
 It was tested on GNU/Linux (require `iw`), OpenBSD (use `ifconfig`) and Mac OS X (require `airport`).  
 Special thanks go to contributors!
 
 
 *   **API key required:**
 
-    A Google API key is required, get it yours here:  
+    A Google API key is required, get yours here:  
     https://developers.google.com/maps/documentation/geolocation/intro
 
 
@@ -26,13 +26,13 @@ Special thanks go to contributors!
 
 *   **Installation on GNU/Linux and OpenBSD ($: user, #: root):**
 
-    On GNU/Linux, the script use the `iw` command to gain access to the Wi-Fi peripheral.  
-    On OpenBSD, it use the `ifconfig` command to gain access to the Wi-Fi peripheral.  
-    On Ubuntu distribution, it require the installation of the following dependencies:
+    On GNU/Linux, the script uses the `iw` command to gain access to the Wi-Fi peripheral.  
+    On OpenBSD, it uses the `ifconfig` command to gain access to the Wi-Fi peripheral.  
+    On Ubuntu distribution, it requires the installation of the following dependencies:
 
         # apt-get install iw
 
-    On Gentoo distribution, it require the installation of the following dependencies:
+    On Gentoo distribution, it requires the installation of the following dependencies:
 
         # emerge -av net-wireless/iw
 
@@ -51,7 +51,7 @@ Special thanks go to contributors!
 
 *   **Installation on Mac OS X:**
 
-    On Mac OS X, it use `airport` to gain access to the Wi-Fi peripheral.  
+    On Mac OS X, it uses `airport` to gain access to the Wi-Fi peripheral.  
     Get it using...
 
         % TODO
